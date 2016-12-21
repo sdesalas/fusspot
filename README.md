@@ -1,2 +1,3 @@
 # fusspot
-Fuzzy neural network for artificial learning applications
+
+Non-deterministic engine for artificial learning applications
