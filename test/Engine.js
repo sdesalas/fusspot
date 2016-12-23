@@ -24,13 +24,7 @@ describe('Engine', function() {
         assert.equal(engine.outputs[0], undefined);
         assert.equal(engine.outputs[1], '123');
         assert.equal(Object.keys(engine.inputs).length, 1);
-        assert.deepEqual(engine.inputs['abc'], [{ 
-            target: 0, 
-            weight: Config.baseWeight 
-        }, { 
-            target: 1, 
-            weight: Config.baseWeight 
-        }]);
+        assert.deepEqual(engine.inputs['abc'], [Config.baseWeight, Config.baseWeight]);
     });
 
     it('#process() untrained', function() {
@@ -84,7 +78,6 @@ describe('Engine', function() {
         assert.around(outcomes.filter(x => x === '123').length, 600);
         assert.around(outcomes.filter(x => x === undefined).length, 400);
     });
-
 
     it('#process() with double strengthened output (no reinforcement)', function() {
         var outcomes = [], iterations = 1000;

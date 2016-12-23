@@ -1,5 +1,5 @@
 {
     "debug": true,
-    "baseWeight": 10,
+    "baseWeight": 1,
     "learningRate": 0.5
 }
