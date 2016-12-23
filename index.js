@@ -64,8 +64,8 @@ class Engine {
         // Strengthen/weaken link
         if (change) {
             relationships[index] *= change;
-            if (relationships[index] > Number.MAX_SAFE_INTEGER) {
-                relationships[index] = Number.MAX_SAFE_INTEGER;
+            if (relationships[index] > 1) {
+                relationships[index] = 1;
             }
         }
         return this;

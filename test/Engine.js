@@ -92,7 +92,7 @@ describe('Engine', function() {
     });
 
     it('#process() with triple strengthened output (allow reinforcement)', function() {
-        var outcomes = [], iterations = 1000;
+        var outcomes = [], iterations = 100;
         engine.strengthen('abc', '123');
         engine.strengthen('abc', '123');
         engine.strengthen('abc', '123');
@@ -101,8 +101,8 @@ describe('Engine', function() {
             outcomes.push(engine.process('abc'));
             iterations--;
         }
-        assert.between(outcomes.filter(x => x === '123').length, 900, 1000);
-        assert.between(outcomes.filter(x => x === undefined).length, 0, 50);
+        assert.between(outcomes.filter(x => x === '123').length, 75, 100);
+        assert.between(outcomes.filter(x => x === undefined).length, 0, 25);
     });
 
 });
