@@ -8,7 +8,7 @@ Fusspot is non-deterministic, you can train it to be biased towards certain resp
 
 At present it uses a simple grid of inputs and outputs, with links between them (think squares in a game of chess) being biased positively and negatively depending on training. Choices are made randomly but biased according to the weight assigned to each square. 
 
-```
+```js
 var grid = new fusspot.Grid();
 grid.output('red pill');
 grid.output('blue pill');
