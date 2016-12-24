@@ -8,4 +8,4 @@ Fusspot is non-deterministic, you can train it to be biased towards certain resp
 
 At present it uses a simple grid of inputs and outputs, with links between them (think squares in a game of chess) being biased positively and negatively depending on training. Choices are made randomly but biased according to the weight assigned to each square. 
 
-While this is sufficient for very simplistic scenarios, more complex scenarios (think: time-series input from analog sensors) require inputs to be turned into vectors so that the engine is called with the vector signature covering a whole list of similar inputs rather than each individual one.
+While this is sufficient for very simplistic scenarios, more complex scenarios (think: time-series input from analog sensors) require inputs to be turned into vectors so that the engine is called with the vector signature covering a whole list of similar inputs rather than each individual one, I am currently doing this separately but might incorporate the process into this algorithm if I think it makes sense.
