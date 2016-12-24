@@ -48,7 +48,7 @@ class Grid {
             // through their use. In other words, we are likely to repeat
             // our previous choices in the absence of anything telling us otherwise.
             // This is what makes fusspot so stubborn. 
-            // To turn it off use `options.adaptive = false`;
+            // To turn it off use `{ adaptive: false }` during instantiation
             if (!expectedOutput || output === expectedOutput)
                     this.strengthen(input, output);
         }
