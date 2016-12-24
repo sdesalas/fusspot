@@ -12,7 +12,7 @@ At present it uses a simple grid of inputs and outputs, with links between them 
 var grid = new Grid();
 grid.output('red pill');
 grid.output('blue pill');
-grid.predict('left hand'); // 1/3 blue pill, 1/3 red pill, 1/3 nothing - whatever it chooses it will remember with until told otherwise.
+grid.predict('left hand'); // 1/3 each pill, 1/3 nothing - and will remember its choice with until told otherwise.
 grid.strengthen('left hand', 'red pill');
 grid.strengthen('left hand', 'red pill');
 grid.predict('left hand); // most likely will say 'red pill'
