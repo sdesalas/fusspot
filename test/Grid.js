@@ -17,8 +17,8 @@ describe('Grid', function() {
         assert.equal(typeof grid.predict, 'function');
     });
 
-    it('#relate() basic trainer logic', function() {
-        var x = grid.relate('abc', '123');
+    it('#link() basic trainer logic', function() {
+        var x = grid.link('abc', '123');
         assert.equal(x, grid);
         assert.equal(grid.outputs.length, 2);
         assert.equal(grid.outputs[0], undefined);
@@ -37,7 +37,7 @@ describe('Grid', function() {
 
     it('#predict() with single known output', function() {
         var outcomes = [], iterations = 1000;
-        grid.relate('abc', '123');
+        grid.link('abc', '123');
         while(iterations-- > 0) {
             outcomes.push(grid.predict(iterations));
         }
@@ -47,8 +47,8 @@ describe('Grid', function() {
 
     it('#predict() with two (distinct) known outputs', function() {
         var outcomes = [], iterations = 1000;
-        grid.relate('abc', '123');
-        grid.relate(123, '456');
+        grid.link('abc', '123');
+        grid.link(123, '456');
         while(iterations-- > 0) {
             outcomes.push(grid.predict(iterations));
         }
@@ -59,8 +59,8 @@ describe('Grid', function() {
 
     it('#predict() with two (equal) known outputs', function() {
         var outcomes = [], iterations = 1000;
-        grid.relate('abc', '123');
-        grid.relate(123, '123');
+        grid.link('abc', '123');
+        grid.link(123, '123');
         while(iterations-- > 0) {
             outcomes.push(grid.predict(iterations));
         }

@@ -56,14 +56,22 @@ class Grid {
     }
 
     strengthen(input, output, weight) {
-        return this.relate(input, output, 1 + (weight || this.options.learningRate));
+        return this.link(input, output, 1 + (weight || this.options.learningRate));
     }
 
     weaken(input, output, weight) {
-        return this.relate(input, output, 1 - (weight || this.options.learningRate));
+        return this.link(input, output, 1 - (weight || this.options.learningRate));
     }
 
-    relate(input, output, change) {
+    certain(input, output) {
+        return this.link(input, output, 100);
+    }
+
+    // Link an input and an output so that they 
+    // are both recognised as possibilities in its environment.
+    // Optional parameter `change` can be used to bias the
+    // likelyhood of output occuring as a result of the input. 
+    link(input, output, change) {
         var index = this.output(output);
         var relationships = this.input(input);
         // Strengthen/weaken link
@@ -74,6 +82,21 @@ class Grid {
             }
         }
         return this;
+    }
+
+    reset() {
+        // All i/o relationships back to default weight.
+        var baseWeight = this.options.baseWeight;
+        Object.keys(this.inputs).forEach(input => {
+            var relationships = this.inputs[input];
+            relationships.forEach((w, i) => relationships[i] = baseWeight);
+        });
+    }
+
+    clear() {
+        // Forget everything. Useful for testing.
+        this.inputs = {};
+        this.outputs = [undefined];
     }
 }
 
