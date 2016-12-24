@@ -30,9 +30,9 @@ class Grid {
         return index;
     }
 
-    // Given a particular input, choose an output 
-    // from available choices (randomised, but biased by weight) 
-    process(input, expectedOutput) {
+    // Given a particular input, predict an output 
+    // from available data (randomised, but biased through training) 
+    predict(input, expectedOutput) {
         var choices = this.input(input);
         var sum = choices.reduce((acc, weight) => acc + weight, 0);
         var weighted = choices.reduce((arr, weight, index) => {
