@@ -47,6 +47,8 @@ class Grid {
             // The logic here is that neural pathways are strengthened
             // through their use. In other words, we are likely to repeat
             // our previous choices in the absence of anything telling us otherwise.
+            // This is what makes fusspot so stubborn. 
+            // To turn it off use `options.adaptive = false`;
             if (!expectedOutput || output === expectedOutput)
                     this.strengthen(input, output);
         }
