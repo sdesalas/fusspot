@@ -70,7 +70,7 @@ class Grid {
     // Link an input and an output so that they 
     // are both recognised as possibilities in its environment.
     // Optional parameter `change` can be used to bias the
-    // likelyhood of output occuring as a result of the input. 
+    // likelihood of output occuring as a result of the input. 
     link(input, output, change) {
         var index = this.output(output);
         var relationships = this.input(input);
