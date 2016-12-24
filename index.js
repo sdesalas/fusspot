@@ -2,7 +2,7 @@
 
 const Config = require('./config.json')
 
-class Engine {
+class Grid {
 
     constructor(options) {
         this.options = Object.assign({}, options, Config);
@@ -79,5 +79,5 @@ function debug() {
 }
 
 module.exports = {
-    Engine: Engine
+    Grid: Grid
 }
