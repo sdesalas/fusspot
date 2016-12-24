@@ -5,7 +5,7 @@ const Config = require('./config.json')
 class Grid {
 
     constructor(options) {
-        this.options = Object.assign({}, options, Config);
+        this.options = Object.assign({}, Config, options);
         this.outputs = [undefined]; // undefined = no output from input
         this.inputs = {};
     }

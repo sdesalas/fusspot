@@ -105,4 +105,18 @@ describe('Grid', function() {
         assert.between(outcomes.filter(x => x === undefined).length, 0, 25);
     });
 
+    it('.options = {adaptive: true}', function() {
+        var outcomes = [], iterations = 1000;
+        grid = new Grid({ adaptive: false });
+        grid.strengthen('abc', '123');
+        while(iterations > 0) {
+            // Adaptive engine requires manual strengthening
+            // so it will not have any reinforcement by default
+            outcomes.push(grid.process('abc'));
+            iterations--;
+        }
+        assert.around(outcomes.filter(x => x === '123').length, 600);
+        assert.around(outcomes.filter(x => x === undefined).length, 400);
+    });
+
 });
