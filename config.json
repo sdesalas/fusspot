@@ -1,5 +1,6 @@
 {
     "debug": true,
+    "adaptive": true,
     "baseWeight": 0.01,
     "learningRate": 0.5
 }

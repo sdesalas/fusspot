@@ -30,13 +30,9 @@ class Grid {
         return index;
     }
 
-    process(input) {
-        // Given a particular input, choose an output 
-        // from available choices (randomised, but biased by weight) 
-        // and then and strengthen the link between input and output.
-        // The logic here is that neural pathways are strengthened
-        // through their use. In other words, we are likely to repeat
-        // our previous choices in the absence of anything telling us otherwise.
+    // Given a particular input, choose an output 
+    // from available choices (randomised, but biased by weight) 
+    process(input, expectedOutput) {
         var choices = this.input(input);
         var sum = choices.reduce((acc, weight) => acc + weight, 0);
         var weighted = choices.reduce((arr, weight, index) => {
@@ -46,7 +42,14 @@ class Grid {
         }, []);
         var index = weighted[Math.floor(Math.random() * weighted.length)];
         var output = this.outputs[index];
-        this.strengthen(input, output);
+        if (this.options.adaptive) {
+            // Adaptive? Strengthen the link between input and output.
+            // The logic here is that neural pathways are strengthened
+            // through their use. In other words, we are likely to repeat
+            // our previous choices in the absence of anything telling us otherwise.
+            if (!expectedOutput || output === expectedOutput)
+                    this.strengthen(input, output);
+        }
         return output;
     }
 
