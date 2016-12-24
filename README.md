@@ -18,6 +18,7 @@ grid.strengthen('left hand', 'red pill');
 grid.predict('left hand'); // will most likely say 'red pill', but not certainly.
 grid.certain('left hand', 'blue pill');
 grid.predict('left hand'); // will almost certainly say 'blue pill'.
+grid.predict('right hand'); // what I never heard of a right hand?? 1/3 each pill, 1/3 nothing
 ```
 
 While this is sufficient for very simplistic scenarios, more complex scenarios (think: time-series input from analog sensors) require inputs to be turned into vectors so that the engine is called with the vector signature covering a whole list of similar inputs rather than each individual one, I am currently doing this separately but might incorporate the process into this algorithm if I think it makes sense.
