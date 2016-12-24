@@ -14,7 +14,7 @@ describe('Grid', function() {
         assert.equal(typeof grid, 'object');
         assert.equal(typeof grid.strengthen, 'function');
         assert.equal(typeof grid.weaken, 'function');
-        assert.equal(typeof grid.process, 'function');
+        assert.equal(typeof grid.predict, 'function');
     });
 
     it('#relate() basic trainer logic', function() {
@@ -27,78 +27,78 @@ describe('Grid', function() {
         assert.deepEqual(grid.inputs['abc'], [Config.baseWeight, Config.baseWeight]);
     });
 
-    it('#process() untrained', function() {
-        assert.equal(grid.process(1), undefined);
-        assert.equal(grid.process('abc'), undefined);
-        assert.equal(grid.process(true), undefined);
-        assert.equal(grid.process(null), undefined);
-        assert.equal(grid.process(undefined), undefined);
+    it('#predict() untrained', function() {
+        assert.equal(grid.predict(1), undefined);
+        assert.equal(grid.predict('abc'), undefined);
+        assert.equal(grid.predict(true), undefined);
+        assert.equal(grid.predict(null), undefined);
+        assert.equal(grid.predict(undefined), undefined);
     });
 
-    it('#process() with single known output', function() {
+    it('#predict() with single known output', function() {
         var outcomes = [], iterations = 1000;
         grid.relate('abc', '123');
         while(iterations-- > 0) {
-            outcomes.push(grid.process(iterations));
+            outcomes.push(grid.predict(iterations));
         }
         assert.around(outcomes.filter(x => x === '123').length, 500);
         assert.around(outcomes.filter(x => x === undefined).length, 500);
     });
 
-    it('#process() with two (distinct) known outputs', function() {
+    it('#predict() with two (distinct) known outputs', function() {
         var outcomes = [], iterations = 1000;
         grid.relate('abc', '123');
         grid.relate(123, '456');
         while(iterations-- > 0) {
-            outcomes.push(grid.process(iterations));
+            outcomes.push(grid.predict(iterations));
         }
         assert.around(outcomes.filter(x => x === '123').length, 333);
         assert.around(outcomes.filter(x => x === '456').length, 333);
         assert.around(outcomes.filter(x => x === undefined).length, 333);
     });
 
-    it('#process() with two (equal) known outputs', function() {
+    it('#predict() with two (equal) known outputs', function() {
         var outcomes = [], iterations = 1000;
         grid.relate('abc', '123');
         grid.relate(123, '123');
         while(iterations-- > 0) {
-            outcomes.push(grid.process(iterations));
+            outcomes.push(grid.predict(iterations));
         }
         assert.around(outcomes.filter(x => x === '123').length, 500);
         assert.around(outcomes.filter(x => x === undefined).length, 500);
     });
 
-    it('#process() with single strengthened output (no reinforcement)', function() {
+    it('#predict() with single strengthened output (no reinforcement)', function() {
         var outcomes = [], iterations = 1000;
         while(iterations-- > 0) {
             grid = new Grid(); // recreate to avoid reinforcement
             grid.strengthen('abc', '123');
-            outcomes.push(grid.process('abc'));
+            outcomes.push(grid.predict('abc'));
         }
         assert.around(outcomes.filter(x => x === '123').length, 600);
         assert.around(outcomes.filter(x => x === undefined).length, 400);
     });
 
-    it('#process() with double strengthened output (no reinforcement)', function() {
+    it('#predict() with double strengthened output (no reinforcement)', function() {
         var outcomes = [], iterations = 1000;
         while(iterations-- > 0) {
             grid = new Grid(); // recreate to avoid reinforcement
             grid.strengthen('abc', '123');
             grid.strengthen('abc', '123');
-            outcomes.push(grid.process('abc'));
+            outcomes.push(grid.predict('abc'));
         }
         assert.around(outcomes.filter(x => x === '123').length, 690);
         assert.around(outcomes.filter(x => x === undefined).length, 310);
     });
 
-    it('#process() with triple strengthened output (allow reinforcement)', function() {
+    it('#predict() with triple strengthened output (allow reinforcement)', function() {
         var outcomes = [], iterations = 100;
         grid.strengthen('abc', '123');
         grid.strengthen('abc', '123');
         grid.strengthen('abc', '123');
         while(iterations > 0) {
             // allow reinforcement
-            outcomes.push(grid.process('abc'));
+            outcomes.push(grid.predict('abc'));
             iterations--;
         }
         assert.between(outcomes.filter(x => x === '123').length, 75, 100);
@@ -112,7 +112,7 @@ describe('Grid', function() {
         while(iterations > 0) {
             // Adaptive engine requires manual strengthening
             // so it will not have any reinforcement by default
-            outcomes.push(grid.process('abc'));
+            outcomes.push(grid.predict('abc'));
             iterations--;
         }
         assert.around(outcomes.filter(x => x === '123').length, 600);
