@@ -55,40 +55,63 @@ class Grid {
         return output;
     }
 
-    strengthen(input, output, weight) {
-        return this.link(input, output, 1 + (weight || this.options.learningRate));
-    }
-
-    weaken(input, output, weight) {
-        return this.link(input, output, 1 - (weight || this.options.learningRate));
-    }
-
-    certain(input, output) {
-        return this.link(input, output, 100);
-    }
-
     // Link an input and an output so that they 
     // are both recognised as possibilities in its environment.
-    // Optional parameter `change` can be used to bias the
-    // likelihood of output occuring as a result of the input. 
-    link(input, output, change) {
+    // Optional `config` object can contain either:
+    // - `value`: absolute value to set the input/output combination to.
+    // - `change`: percentage to bias the likelihood of this input/output combination.
+    link(input, output, config) {
         var index = this.output(output);
         var relationships = this.input(input);
-        // Strengthen/weaken link
-        if (change) {
-            relationships[index] *= change;
-            if (relationships[index] > 1) {
-                relationships[index] = 1;
+        if (config) {
+            if (!isNaN(config.value)) {
+                // Set to specific value
+                relationships[index] = value;
+            } else if (!isNaN(config.change)) {
+                // Strengthen/weaken link
+                relationships[index] *= config.change;
+                if (relationships[index] > 1) {
+                    relationships[index] = 1;
+                }
             }
         }
         return this;
     }
 
-    reset() {
-        // All i/o relationships back to default weight.
+    strengthen(input, output) {
+        return this.link(input, output, { change: 1 + this.options.learningRate });
+    }
+
+    weaken(input, output) {
+        return this.link(input, output, { change: 1 - this.options.learningRate });
+    }
+
+    certain(input, output) {
+        var max = Math.max(this.input(input));
+        return this.link(input, output, { value: max * 10 });
+    }
+ 
+    likely(input, ouptut) {
+        var max = Math.max(this.input(input));
+        return this.link(input, output, { value: max * 1.5 });
+    }
+
+    unlikely(input, output) {
+        var min = Math.min(this.input(input));
+        return this.link(input, output, { value: min / 1.5 });
+    }
+
+    impossible(input, output) {
+        var min = Math.min(this.input(input));
+        return this.link(input, output, { value: min / 10 });
+    }
+
+    reset(input) {
+        // Reset input/output combinations back to default weight.
         var baseWeight = this.options.baseWeight;
-        Object.keys(this.inputs).forEach(input => {
-            var relationships = this.inputs[input];
+        Object.keys(this.inputs).forEach(key => {
+            if (input && input !== key) return;
+            var relationships = this.inputs[key];
             relationships.forEach((w, i) => relationships[i] = baseWeight);
         });
     }
