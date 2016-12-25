@@ -28,12 +28,10 @@ Another example. Note that the result of the last 2 calls will become reinforce 
 
 ```js
 var grid = new fusspot.Grid();
-grid.output('turn left');
-grid.output('turn right');
 grid.likely('first junction', 'turn left');
 grid.likely('second junction', 'turn right');
-grid.predict('first junction'); // most likely 'turn left'
-grid.predict('second junction'); // probably 'turn right', but may turn left or do nothing
+grid.predict('first junction'); // probably 'turn left'
+grid.predict('second junction'); // probably 'turn right'
 ```
 
 ![learning.png](learning.png)
