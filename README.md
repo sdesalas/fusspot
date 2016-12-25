@@ -27,7 +27,7 @@ grid.predict('right hand'); // what?? I never heard of a right hand! -> 1/3 each
 Another example. Note that the result of the last 2 calls will become reinforce with each use.
 
 ```js
-var grid = new fusspot.Grid({ baseWeight: 0.01, learningRate: 0.5 }); // start at 0.01, 50% weight change when learning
+var grid = new fusspot.Grid({ baseWeight: 0.01, learningRate: 0.5 }); // start at 0.01, 50% up/down when learning
 grid.likely('first junction', 'turn left');
 grid.likely('second junction', 'turn right');
 grid.predict('first junction'); // probably 'turn left'
