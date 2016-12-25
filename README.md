@@ -36,4 +36,6 @@ grid.predict('first junction'); // most likely 'turn left'
 grid.predict('second junction'); // probably 'turn right', but may turn left or do nothing
 ```
 
+![learning.png](learning.png)
+
 While this is sufficient for very simplistic scenarios, more complex scenarios (think: time-series input from analog sensors) require inputs to be turned into vectors so that the engine is called with the vector signature covering a whole list of similar inputs rather than each individual one, I am currently doing this separately but might incorporate the process into this algorithm if I think it makes sense.
