@@ -87,22 +87,22 @@ class Grid {
     }
 
     certain(input, output) {
-        var max = Math.max(this.input(input));
+        var max = Math.max.apply(null, this.input(input));
         return this.link(input, output, { value: max * 10 });
     }
  
     likely(input, ouptut) {
-        var max = Math.max(this.input(input));
+        var max = Math.max.apply(null, this.input(input));
         return this.link(input, output, { value: max * 1.5 });
     }
 
     unlikely(input, output) {
-        var min = Math.min(this.input(input));
+        var min = Math.min.apply(null, this.input(input));
         return this.link(input, output, { value: min / 1.5 });
     }
 
     impossible(input, output) {
-        var min = Math.min(this.input(input));
+        var min = Math.min.apply(null, this.input(input));
         return this.link(input, output, { value: min / 10 });
     }
 
