@@ -2,6 +2,5 @@
     "debug": true,
     "adaptive": true,
     "baseWeight": 0.001,
-    "learningRate": 0.5,
-    "maxWeight"
+    "learningRate": 0.5
 }
