@@ -79,11 +79,11 @@ class Grid {
     }
 
     strengthen(input, output, change) {
-        return this.link(input, output, { change: 1 + change || this.options.learningRate });
+        return this.link(input, output, { change: 1 + (change || this.options.learningRate) });
     }
 
     weaken(input, output, change) {
-        return this.link(input, output, { change: 1 - change || this.options.learningRate });
+        return this.link(input, output, { change: 1 - (change || this.options.learningRate) });
     }
 
     certain(input, output) {
