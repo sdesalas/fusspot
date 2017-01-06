@@ -105,7 +105,51 @@ describe('Grid', function() {
         assert.between(outcomes.filter(x => x === undefined).length, 0, 25);
     });
 
-    it('.options = {adaptive: true}', function() {
+    it('#certain()', function() {
+        var outcomes = [], iterations = 1000;
+        grid.certain('abc', '123');
+        while(iterations-- > 0) {
+            outcomes.push(grid.predict('abc'));
+        }
+        assert.around(outcomes.filter(x => x === '123').length, 950);
+        assert.between(outcomes.filter(x => x === undefined).length, 0, 30);
+    });
+
+    it('#likely()', function() {
+        var outcomes = [], iterations = 1000;
+        grid = new Grid({ adaptive: false });
+        grid.likely('abc', '123');
+        while(iterations-- > 0) {
+            outcomes.push(grid.predict('abc'));
+        }
+        assert.around(outcomes.filter(x => x === '123').length, 750);
+        assert.between(outcomes.filter(x => x === undefined).length, 200, 300);
+    });
+
+    it('#unlikely()', function() {
+        var outcomes = [], iterations = 1000;
+        grid = new Grid({ adaptive: false });
+        grid.unlikely('abc', '123');
+        while(iterations-- > 0) {
+            outcomes.push(grid.predict('abc'));
+        }
+        assert.between(outcomes.filter(x => x === '123').length, 200, 300);
+        assert.around(outcomes.filter(x => x === undefined).length, 750);
+    });
+
+
+    it('#impossible()', function() {
+        var outcomes = [], iterations = 1000;
+        grid = new Grid({ adaptive: false });
+        grid.impossible('abc', '123');
+        while(iterations-- > 0) {
+            outcomes.push(grid.predict('abc'));
+        }
+        assert.between(outcomes.filter(x => x === '123').length, 0, 100);
+        assert.around(outcomes.filter(x => x === undefined).length, 900);
+    });
+
+    it('.options = {adaptive: false}', function() {
         var outcomes = [], iterations = 1000;
         grid = new Grid({ adaptive: false });
         grid.strengthen('abc', '123');

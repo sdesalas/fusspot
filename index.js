@@ -66,12 +66,15 @@ class Grid {
         if (config) {
             if (!isNaN(config.value)) {
                 // Set to specific value
-                relationships[index] = value;
+                relationships[index] = config.value;
             } else if (!isNaN(config.change)) {
                 // Strengthen/weaken link
                 relationships[index] *= config.change;
                 if (relationships[index] > 1) {
-                    relationships[index] = 1;
+                    // When above max divide everything by 10
+                    for (var i = 0; i < relationships.length; i++) {
+                        relationships[i] /= 10;
+                    }
                 }
             }
         }
@@ -87,23 +90,23 @@ class Grid {
     }
 
     certain(input, output) {
-        var max = Math.max.apply(null, this.input(input));
-        return this.link(input, output, { value: max * 10 });
+        var sum = this.input(input).reduce((a,b) => a+b, 0);
+        return this.link(input, output, { value: sum * 20 });
     }
  
-    likely(input, ouptut) {
-        var max = Math.max.apply(null, this.input(input));
-        return this.link(input, output, { value: max * 1.5 });
+    likely(input, output) {
+        var sum = this.input(input).reduce((a,b) => a+b, 0);
+        return this.link(input, output, { value: sum * 3 });
     }
 
     unlikely(input, output) {
-        var min = Math.min.apply(null, this.input(input));
-        return this.link(input, output, { value: min / 1.5 });
+        var sum = this.input(input).reduce((a,b) => a+b, 0);
+        return this.link(input, output, { value: sum * 0.33 });
     }
 
     impossible(input, output) {
-        var min = Math.min.apply(null, this.input(input));
-        return this.link(input, output, { value: min / 10 });
+        var sum = this.input(input).reduce((a,b) => a+b, 0);
+        return this.link(input, output, { value: sum * 0.05 });
     }
 
     reset(input) {
