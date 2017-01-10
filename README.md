@@ -6,7 +6,7 @@ Fusspot is a learning engine I've been meaning to write for 20-odd years. Its on
 
 Fusspot is non-deterministic, you can train it to be biased towards certain responses with patience, but it will just as likely learn on its own or veer away from what it has learnt (ie, do what it likes rather than what its told). 
 
-At present it uses a simple grid of inputs and outputs, with links between them (think squares in a game of chess) being biased positively and negatively depending on training. Choices are made randomly but biased according to the weight assigned to each square. 
+At present it uses a simple relational matrix of inputs and outputs, with links between them (think squares in a game of chess) being biased positively and negatively depending on training. Choices are made randomly but biased according to the weight assigned to each square. 
 
 ```js
 var grid = new fusspot.Grid();
