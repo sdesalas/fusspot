@@ -55,11 +55,12 @@ class Neuron extends Array {
     }
 
     static synapse(networkSize, position) {
-        // Neurons tend to be linked to neurons nearby
+        var i, w = Math.random();
+        /* 
+        // Use a tube-shaped network
+        // (neurons linked to neurons with similar id)
         var range = Math.ceil(networkSize / 10);
         var offset = position + Math.floor(range / 2);
-        var i, w = Math.random();
-        /* // Use a tube-shaped network
         for (var tries = 0; tries < 3; tries++) {
             var from = -1 * range + offset;
             var to = range + offset;
@@ -67,7 +68,8 @@ class Neuron extends Array {
             if (i > 0 && i < networkSize && i !== position) {
                 return { i, w }; // index, weight
             }
-        }*/
+        }
+        */
         i = Random.integer(0, networkSize);
         if (i !== position) {
             return { i, w };
