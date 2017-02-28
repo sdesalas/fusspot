@@ -3,36 +3,40 @@
   <head>
     <meta charset="UTF-8">
     <title>Playground</title>
-    <script src="../NeuralNetwork.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/vis/4.18.1/vis.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.18.1/vis.min.css" type="text/css" />
     <style>
-        body { padding: 20px; }
+        body { padding: 0 20px; width: 640px; }
         #map { width: 600px; height: 600px; border: 1px solid #ddd; }
         #log { font: 12px "Courier New"; }
     </style>
   </head>
   <body>
     <h1>Neural Network</h1>
-    <p>Double click a node and watch the message bounce around in <code>console.log()</code></p>
+    <p>Double click a node and watch the message bounce around.<button id="stop" onclick="network.stop()" style="float: right">Stop</button></p>
     <div id="map"></div>
     <div id="log"></div>
     <script>
         function display(network) {
             var options = { 
                 edges: { smooth: { type:'continuous' } },
-                nodes: { font: '24px Tahoma', shape: 'dot', scaling: { min: 25, max: 25 } } 
+                nodes: { font: '24px Tahoma', shape: 'dot', scaling: { min: 20, max: 20 } } 
             };
             var data = {
-                nodes: network.nodes.map((n, i) => Object({ id: i, label: String(i), value: i})),
+                nodeArray: network.nodes.map((n, i) => Object({ id: i, label: String(i), value: i})),
                 edges: []
             };
-            network.nodes.forEach((n, i) => n.forEach(synapse => {
-                data.edges.push({ from: i, to: synapse.i, value: synapse.w });
-            }));
-            var map = new vis.Network(document.getElementById('map'), data, options);
-            map.on("doubleClick", function (params) {
+            data.nodes = new vis.DataSet(data.nodeArray);
+            network.nodes.forEach((n, i) => {
+                n.on('fire', id => data.nodes.update([ { id: id, color: { background: '#f00' } } ]));
+                n.on('ready', id => data.nodes.update([ { id: id, color: { background: '#97c2fc' } } ]))
+                n.synapses.forEach(synapse => {
+                    data.edges.push({ from: i, to: synapse.i, value: synapse.w / 2, arrows:'to' });
+                })
+            });
+            var map = new vis.Network(document.getElementById('map'), { nodes: data.nodes, edges: data.edges }, options);
+            map.on('doubleClick', function (params) {
                 params.event = "[original event]";
                 document.getElementById('log').innerHTML = '<p>doubleClick event:</p>' + JSON.stringify(params, null, 4);
                 var target = params.nodes[0];
@@ -42,9 +46,6 @@
             });
         }
     </script>
-    <script>
-        var network = new NeuralNetwork(100);
-        display(network);
-    </script>
+    <script src="bundle.js"></script>
   </body>
 </html>
