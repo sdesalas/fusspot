@@ -8,6 +8,8 @@ var SYNAPSE_AVG_PER_NEURON = 2;
 var SIGNAL_MAX_FIRE_DELAY = 300;
 var SIGNAL_RECOVERY_DELAY = 1200;
 var SIGNAL_FIRE_STRENGTH = 0.2;
+var LEARNING_RATE = 0.3;
+var LEARNING_PERIOD = 60 * 1000;
 
 class NeuralNetwork extends EventEmitter {
 
@@ -65,17 +67,41 @@ class NeuralNetwork extends EventEmitter {
         }
     }
 
+    unlearn(rate) {
+        this.learn(-1 * (rate || LEARNING_RATE));
+    }
+
+    learn(rate) {
+        var start = new Date().getTime() - LEARNING_PERIOD;
+        this.synapses
+            .forEach(s => {
+                var recency = s.l - start;
+                if (recency > 0) {
+                    s.w += (recency / LEARNING_PERIOD) * (rate || LEARNING_RATE);
+                    s.w = s.w < 0 ? 0 : s.w;
+                    s.w = s.w > 1 ? 1 : s.w;
+                }
+            });
+    }
+
     stop() {
-        this.nodes.forEach(n => n.synapses.forEach(s => clearTimeout(s.c)));
+        this.synapses.forEach(s => clearTimeout(s.c));
     }
 
     get size() {
         return this.nodes.length;
     }
 
+    get strength() {
+        var synapses = this.synapses;
+        return synapses.map(s => s.w).reduce((a,b) => a+b, 0) / synapses.length;
+    }
+
+    get synapses() {
+        return this.nodes.reduce((acc, node) => acc.concat(node.synapses), []);
+    }
 }
 
-// Defines an array of connections to other neurons
 class Neuron extends EventEmitter {
 
     constructor(synapses, index) {
@@ -119,6 +145,7 @@ class Neuron extends EventEmitter {
         return new Neuron(synapses, position);
     }
 
+    // Should be optimised as this gets executed very frequently.
     fire() {
         this.emit('fire', this.id);
         this.synapses.forEach(synapse => {
@@ -163,7 +190,7 @@ module.exports = NeuralNetwork;
 
 const NeuralNetwork = require('../NeuralNetwork');
 window.NeuralNetwork = NeuralNetwork;
-window.network = new NeuralNetwork(100);
+window.network = new NeuralNetwork(80);
 display(network);
 
 })();

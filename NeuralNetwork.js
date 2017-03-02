@@ -71,7 +71,7 @@ class NeuralNetwork extends EventEmitter {
     }
 
     learn(rate) {
-        var start = new Date.getTime() - LEARNING_PERIOD;
+        var start = new Date().getTime() - LEARNING_PERIOD;
         this.synapses
             .forEach(s => {
                 var recency = s.l - start;
