@@ -1,3 +1,5 @@
+"use strict";
+
 var EventEmitter = require('events');
 
 var NETWORK_DEFAULT_SIZE = 256;

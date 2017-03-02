@@ -1,3 +1,7 @@
+"use strict";
+
+const Config = require('./config.json')
+
 class Grid {
 
     constructor(options) {

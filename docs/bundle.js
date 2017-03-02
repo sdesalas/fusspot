@@ -1,4 +1,174 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+"use strict";
+
+var EventEmitter = require('events');
+
+var NETWORK_DEFAULT_SIZE = 256;
+var SYNAPSE_AVG_PER_NEURON = 2;
+var SIGNAL_MAX_FIRE_DELAY = 300;
+var SIGNAL_RECOVERY_DELAY = 1200;
+var SIGNAL_FIRE_STRENGTH = 0.2;
+
+class NeuralNetwork extends EventEmitter {
+
+    constructor(size) {
+        super();
+        this.nodes = [];
+        if (typeof size === 'number') {
+            // Initialize with size
+            // ie new NeuralNetwork(300)
+            this.nodes = new Array(size)
+                .fill()
+                .map((n, i) => Neuron.random(size, i));
+        }
+        else if (size && size.nodes && size.nodes instanceof Array) {
+            // Initialize with exported network
+            // ie new NeuralNetwork({ nodes: [
+            //   {id: 1, s: [{t: 1, w: 0.41}] }, 
+            //   {id: 2, s: [{t: 2, w: 0.020}, {t: 3, w: 0.135}] },
+            //   {id: 3, s: [{t: 5, w: 0.241}] }, 
+            //   {id: 4, s: [{t: 1, w: 0.02}] }, 
+            //   {id: 5, s: [{t: 6, w: 0.92}, {t: 2, w: 0.41}] },
+            //   {id: 6, s: [{t: 2, w: 0.41}] }
+            // ]})
+            //
+            this.nodes = size.nodes.map((n, i) => {
+                var neuron = new Neuron(n.s, n.id);
+                neuron.synapses.forEach(s => s.i = s.t);
+                return neuron;
+            });
+        } 
+        // Extra initialization per neuron
+        this.nodes.forEach(neuron => {
+            // Log fire event
+            neuron.on('fire', id => console.log('Firing ' + id));
+            // Add synapse ref pointers to corresponding target neurons
+            neuron.synapses.forEach(synapse => {
+                synapse.t = this.nodes[synapse.i];
+            })
+        });
+    }
+
+    clone() {
+        return new NeuralNetwork(this.export());
+    }
+
+    export() {
+        return { 
+            nodes: this.nodes.map(node => Object({ 
+                id: node.id, 
+                s: node.synapses
+                    .slice()
+                    // Remove circular ref pointers
+                    .map(s => Object({t: s.i, w: s.w})) 
+            }))
+        }
+    }
+
+    stop() {
+        this.nodes.forEach(n => n.synapses.forEach(s => clearTimeout(s.c)));
+    }
+
+    get size() {
+        return this.nodes.length;
+    }
+
+}
+
+// Defines an array of connections to other neurons
+class Neuron extends EventEmitter {
+
+    constructor(synapses, index) {
+        super();
+        this.synapses = synapses || [];
+        this.id = index > -1 ? index : Random.alpha(6);
+    }
+
+    // Generates a random neuron
+    static random(networkSize, position) {
+        // Number of synapses are random based on average
+        var synapses = new Array(Random.integer(1, SYNAPSE_AVG_PER_NEURON * 2 - 1))
+            .fill()
+            .map(() => {
+                var i, w = Math.random();
+                
+                // Use a tube-shaped network
+                // (neurons linked to neurons with similar id)
+                var range = Math.ceil(networkSize / 10);
+                var offset = position + Math.floor(range / 2);
+                for (var tries = 0; tries < 3; tries++) {
+                    var from = -1 * range + offset;
+                    var to = range + offset;
+                    i = Random.integer(from, to);
+                    if (i > 0 && i < networkSize && i !== position) {
+                        return { i, w }; // index, weight
+                    }
+                }
+                
+                // Random network
+                // (neurons linked at random)
+                i = Random.integer(0, networkSize);
+                if (i !== position) {
+                    return { i, w };
+                }
+
+                // Cannot find suitable target
+                return null;
+            })
+            .filter(s => !!s);
+        return new Neuron(synapses, position);
+    }
+
+    fire() {
+        this.emit('fire', this.id);
+        this.synapses.forEach(synapse => {
+            if (synapse.t && synapse.w > SIGNAL_FIRE_STRENGTH && !(synapse.l > new Date().getTime() - SIGNAL_RECOVERY_DELAY)) {
+                // Stronger connections will fire quicker
+                // @see Conduction Velocity: https://faculty.washington.edu/chudler/cv.html
+                synapse.c = setTimeout(() => synapse.t.fire(), Math.round(SIGNAL_MAX_FIRE_DELAY * (1 - synapse.w)));
+                // Avoid epileptic spasm by tracking when last fired
+                synapse.l = new Date().getTime(); 
+            }
+        });
+        setTimeout(() => this.emit('ready', this.id), SIGNAL_RECOVERY_DELAY);
+    }
+
+}
+
+class Random {
+
+    // Inclusive random integers
+    static integer(from, to) { 
+        if (!from && !to) return 0;
+        if (!to) { to = from; from = 0; }
+        var diff = to + 1 - from;
+        return Math.floor(Math.random() * diff) + from; 
+    }
+
+    static alpha(length) {
+        var output = '';
+        do {
+            output += Math.random().toString('16').substr(2);
+            if (output.length > length) {
+                output = output.substr(0,length);
+            }
+        } while (length > 0 && output.length < length)
+        return output;
+    }
+}
+
+module.exports = NeuralNetwork;
+},{"events":3}],2:[function(require,module,exports){
+(function() {
+
+const NeuralNetwork = require('../NeuralNetwork');
+window.NeuralNetwork = NeuralNetwork;
+window.network = new NeuralNetwork(100);
+display(network);
+
+})();
+
+},{"../NeuralNetwork":1}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -302,172 +472,4 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],2:[function(require,module,exports){
-var EventEmitter = require('events');
-
-var NETWORK_DEFAULT_SIZE = 256;
-var SYNAPSE_AVG_PER_NEURON = 2;
-var SIGNAL_MAX_FIRE_DELAY = 300;
-var SIGNAL_RECOVERY_DELAY = 1200;
-var SIGNAL_FIRE_STRENGTH = 0.2;
-
-class NeuralNetwork extends EventEmitter {
-
-    constructor(size) {
-        super();
-        this.nodes = [];
-        if (typeof size === 'number') {
-            // Initialize with size
-            // ie new NeuralNetwork(300)
-            this.nodes = new Array(size)
-                .fill()
-                .map((n, i) => Neuron.random(size, i));
-        }
-        else if (size && size.nodes && size.nodes instanceof Array) {
-            // Initialize with exported network
-            // ie new NeuralNetwork({ nodes: [
-            //   {id: 1, s: [{t: 1, w: 0.41}] }, 
-            //   {id: 2, s: [{t: 2, w: 0.020}, {t: 3, w: 0.135}] },
-            //   {id: 3, s: [{t: 5, w: 0.241}] }, 
-            //   {id: 4, s: [{t: 1, w: 0.02}] }, 
-            //   {id: 5, s: [{t: 6, w: 0.92}, {t: 2, w: 0.41}] },
-            //   {id: 6, s: [{t: 2, w: 0.41}] }
-            // ]})
-            //
-            this.nodes = size.nodes.map((n, i) => {
-                var neuron = new Neuron(n.s, n.id);
-                neuron.synapses.forEach(s => s.i = s.t);
-                return neuron;
-            });
-        } 
-        // Extra initialization per neuron
-        this.nodes.forEach(neuron => {
-            // Log fire event
-            neuron.on('fire', id => console.log('Firing ' + id));
-            // Add synapse ref pointers to corresponding target neurons
-            neuron.synapses.forEach(synapse => {
-                synapse.t = this.nodes[synapse.i];
-            })
-        });
-    }
-
-    clone() {
-        return new NeuralNetwork(this.export());
-    }
-
-    export() {
-        return { 
-            nodes: this.nodes.map(node => Object({ 
-                id: node.id, 
-                s: node.synapses
-                    .slice()
-                    // Remove circular ref pointers
-                    .map(s => Object({t: s.i, w: s.w})) 
-            }))
-        }
-    }
-
-    stop() {
-        this.nodes.forEach(n => n.synapses.forEach(s => clearTimeout(s.c)));
-    }
-
-    get size() {
-        return this.nodes.length;
-    }
-
-}
-
-// Defines an array of connections to other neurons
-class Neuron extends EventEmitter {
-
-    constructor(synapses, index) {
-        super();
-        this.synapses = synapses || [];
-        this.id = index > -1 ? index : Random.alpha(6);
-    }
-
-    // Generates a random neuron
-    static random(networkSize, position) {
-        // Number of synapses are random based on average
-        var synapses = new Array(Random.integer(1, SYNAPSE_AVG_PER_NEURON * 2 - 1))
-            .fill()
-            .map(() => {
-                var i, w = Math.random();
-                
-                // Use a tube-shaped network
-                // (neurons linked to neurons with similar id)
-                var range = Math.ceil(networkSize / 10);
-                var offset = position + Math.floor(range / 2);
-                for (var tries = 0; tries < 3; tries++) {
-                    var from = -1 * range + offset;
-                    var to = range + offset;
-                    i = Random.integer(from, to);
-                    if (i > 0 && i < networkSize && i !== position) {
-                        return { i, w }; // index, weight
-                    }
-                }
-                
-                // Random network
-                // (neurons linked at random)
-                i = Random.integer(0, networkSize);
-                if (i !== position) {
-                    return { i, w };
-                }
-
-                // Cannot find suitable target
-                return null;
-            })
-            .filter(s => !!s);
-        return new Neuron(synapses, position);
-    }
-
-    fire() {
-        this.emit('fire', this.id);
-        this.synapses.forEach(synapse => {
-            if (synapse.t && synapse.w > SIGNAL_FIRE_STRENGTH && !(synapse.l > new Date().getTime() - SIGNAL_RECOVERY_DELAY)) {
-                // Stronger connections will fire quicker
-                // @see Conduction Velocity: https://faculty.washington.edu/chudler/cv.html
-                synapse.c = setTimeout(() => synapse.t.fire(), Math.round(SIGNAL_MAX_FIRE_DELAY * (1 - synapse.w)));
-                // Avoid epileptic spasm by tracking when last fired
-                synapse.l = new Date().getTime(); 
-            }
-        });
-        setTimeout(() => this.emit('ready', this.id), SIGNAL_RECOVERY_DELAY);
-    }
-
-}
-
-class Random {
-
-    // Inclusive random integers
-    static integer(from, to) { 
-        if (!from && !to) return 0;
-        if (!to) { to = from; from = 0; }
-        var diff = to + 1 - from;
-        return Math.floor(Math.random() * diff) + from; 
-    }
-
-    static alpha(length) {
-        var output = '';
-        do {
-            output += Math.random().toString('16').substr(2);
-            if (output.length > length) {
-                output = output.substr(0,length);
-            }
-        } while (length > 0 && output.length < length)
-        return output;
-    }
-}
-
-module.exports = NeuralNetwork;
-},{"events":1}],3:[function(require,module,exports){
-(function() {
-
-const NeuralNetwork = require('../NeuralNetwork');
-window.NeuralNetwork = NeuralNetwork;
-window.network = new NeuralNetwork(100);
-display(network);
-
-})();
-
-},{"../NeuralNetwork":2}]},{},[3]);
+},{}]},{},[2]);
