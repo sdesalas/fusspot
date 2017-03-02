@@ -4,9 +4,11 @@
 
 Fusspot is a learning engine I've been meaning to write for while now. Its only now that it has become relevant as I am building [nodebots](http://nodebots.io/).
 
-Fusspot is non-deterministic, you can train it to be biased towards certain responses with patience, but it will just as likely learn on its own or veer away from what it has learnt (ie, do what it likes rather than what its told). 
+##Grid
 
-At present it uses a simple relational matrix of inputs and outputs, with links between them (think squares in a game of chess) being biased positively and negatively depending on training. Choices are made randomly but biased according to the weight assigned to each square. 
+A fusspot Grid is a weighted matrix of inputs to outputs. While you can train it to be biased towards certain responses with patience, it is non determinisic and will just as likely learn on its own or veer away from what it has learnt (ie, do what it likes rather than what its told). 
+
+At present, links between inputs and ouputs (think squares in a game of chess) are biased positively or negatively depending on a combination of random choices and training/reinforcement which biases the likelyhood of those choices.
 
 ```js
 var grid = new fusspot.Grid();
