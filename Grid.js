@@ -1,4 +1,6 @@
-const Config = require('./config.json');
+"use strict";
+
+const Config = require('./config.json')
 
 class Grid {
 
