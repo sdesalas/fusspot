@@ -46,7 +46,7 @@ A fusspot neural network is a learning engine that can process multiple inputs a
 
 Unlike traditional neural networks, fusspot introduces a slight delay between firing neurons, which varies depending on the strength of the connection. This creates [travelling waves, oscillations and paterns](https://sdesalas.github.io/fusspot/) that are affected by its inputs.
 
-The neural network can be trained by increasing or decreasing the strength of neural pathways in the recent past. More closely mimicking the kind of Long Term Potentiation (LTP) seen in biological networks.
+The neural network can be trained by increasing or decreasing the strength of neural pathways used in the recent past. More closely mimicking the kind of Long Term Potentiation (LTP) seen in biological networks.
 
 ```js
 const NeuralNetwork = require('fusspot').NeuralNetwork;
