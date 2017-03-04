@@ -1,15 +1,16 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-var EventEmitter = require('events');
+const EventEmitter = require('events');
 
-var NETWORK_DEFAULT_SIZE = 256;
-var SYNAPSE_AVG_PER_NEURON = 2;
-var SIGNAL_MAX_FIRE_DELAY = 300;
-var SIGNAL_RECOVERY_DELAY = 1200;
-var SIGNAL_FIRE_STRENGTH = 0.2;
-var LEARNING_RATE = 0.3;
-var LEARNING_PERIOD = 60 * 1000;
+const NETWORK_DEFAULT_SIZE = 256;
+const SYNAPSE_AVG_PER_NEURON = 2;
+const SYNAPSE_AVG_WEIGHT = 0.5;
+const SIGNAL_MAX_FIRE_DELAY = 300;
+const SIGNAL_RECOVERY_DELAY = 1200;
+const SIGNAL_FIRE_STRENGTH = 0.33;
+const LEARNING_RATE = 0.3;
+const LEARNING_PERIOD = 60 * 1000;
 
 class NeuralNetwork extends EventEmitter {
 
@@ -108,6 +109,7 @@ class Neuron extends EventEmitter {
         super();
         this.synapses = synapses || [];
         this.id = index > -1 ? index : Random.alpha(6);
+        this.potential = 0; 
     }
 
     // Generates a random neuron
@@ -116,9 +118,11 @@ class Neuron extends EventEmitter {
         var synapses = new Array(Random.integer(1, SYNAPSE_AVG_PER_NEURON * 2 - 1))
             .fill()
             .map(() => {
-                var i, w = Math.random();
+                var i; // i => index of target neuron
+                var w = Math.random() * SYNAPSE_AVG_WEIGHT * 2;
+                w = w > 1 ? 1 : w; // w => weight (strength) of synapse
                 
-                // Use a tube-shaped network
+                // Use a tube-shaped networka
                 // (neurons linked to neurons with similar id)
                 var range = Math.ceil(networkSize / 10);
                 var offset = position + Math.floor(range / 2);
@@ -146,18 +150,38 @@ class Neuron extends EventEmitter {
     }
 
     // Should be optimised as this gets executed very frequently.
-    fire() {
-        this.emit('fire', this.id);
-        this.synapses.forEach(synapse => {
-            if (synapse.t && synapse.w > SIGNAL_FIRE_STRENGTH && !(synapse.l > new Date().getTime() - SIGNAL_RECOVERY_DELAY)) {
-                // Stronger connections will fire quicker
-                // @see Conduction Velocity: https://faculty.washington.edu/chudler/cv.html
-                synapse.c = setTimeout(() => synapse.t.fire(), Math.round(SIGNAL_MAX_FIRE_DELAY * (1 - synapse.w)));
-                // Avoid epileptic spasm by tracking when last fired
-                synapse.l = new Date().getTime(); 
-            }
-        });
-        setTimeout(() => this.emit('ready', this.id), SIGNAL_RECOVERY_DELAY);
+    fire(potential) {
+        if (this.isfiring) return false;
+        // Action potential is accumulated so that
+        // certain patterns can trigger even
+        // weak synapses.
+        this.potential += potential || 1;
+        setTimeout(() => this.potential -= potential, SIGNAL_RECOVERY_DELAY / 2);
+        if (this.potential > SIGNAL_FIRE_STRENGTH) {
+            // Fire signal
+            this.isfiring = true;
+            this.emit('fire', this.id);
+            this.synapses.forEach(synapse => {
+                if (synapse.t) {
+                    // Stronger connections will fire quicker
+                    // @see Conduction Velocity: https://faculty.washington.edu/chudler/cv.html
+                    synapse.c = setTimeout(() => {
+                        if (synapse.t.fire(synapse.w)) {
+                            // Avoid epileptic spasm by tracking when last fired
+                            synapse.l = new Date().getTime(); 
+                        }
+                    }, Math.round(SIGNAL_MAX_FIRE_DELAY * (1 - synapse.w)));
+                    
+                }
+            });
+            // Post-fire recovery
+            setTimeout(() => {
+                this.potential = 0;
+                this.isfiring = false;
+                this.emit('ready', this.id);
+            }, SIGNAL_RECOVERY_DELAY);
+        }
+        return true;
     }
 
 }
@@ -190,7 +214,7 @@ module.exports = NeuralNetwork;
 
 const NeuralNetwork = require('../NeuralNetwork');
 window.NeuralNetwork = NeuralNetwork;
-window.network = new NeuralNetwork(80);
+window.network = new NeuralNetwork(100);
 display(network);
 
 })();

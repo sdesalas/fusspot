@@ -1,14 +1,14 @@
 "use strict";
 
-var EventEmitter = require('events');
+const EventEmitter = require('events');
 
-var NETWORK_DEFAULT_SIZE = 256;
-var SYNAPSE_AVG_PER_NEURON = 2;
-var SIGNAL_MAX_FIRE_DELAY = 300;
-var SIGNAL_RECOVERY_DELAY = 1200;
-var SIGNAL_FIRE_STRENGTH = 0.2;
-var LEARNING_RATE = 0.3;
-var LEARNING_PERIOD = 60 * 1000;
+const NETWORK_DEFAULT_SIZE = 256;
+const SYNAPSE_AVG_PER_NEURON = 2;
+const SIGNAL_MAX_FIRE_DELAY = 300;
+const SIGNAL_RECOVERY_DELAY = 1200;
+const SIGNAL_FIRE_STRENGTH = 0.33;
+const LEARNING_RATE = 0.3;
+const LEARNING_PERIOD = 60 * 1000;
 
 class NeuralNetwork extends EventEmitter {
 
@@ -107,6 +107,7 @@ class Neuron extends EventEmitter {
         super();
         this.synapses = synapses || [];
         this.id = index > -1 ? index : Random.alpha(6);
+        this.potential = 0; 
     }
 
     // Generates a random neuron
@@ -145,18 +146,38 @@ class Neuron extends EventEmitter {
     }
 
     // Should be optimised as this gets executed very frequently.
-    fire() {
-        this.emit('fire', this.id);
-        this.synapses.forEach(synapse => {
-            if (synapse.t && synapse.w > SIGNAL_FIRE_STRENGTH && !(synapse.l > new Date().getTime() - SIGNAL_RECOVERY_DELAY)) {
-                // Stronger connections will fire quicker
-                // @see Conduction Velocity: https://faculty.washington.edu/chudler/cv.html
-                synapse.c = setTimeout(() => synapse.t.fire(), Math.round(SIGNAL_MAX_FIRE_DELAY * (1 - synapse.w)));
-                // Avoid epileptic spasm by tracking when last fired
-                synapse.l = new Date().getTime(); 
-            }
-        });
-        setTimeout(() => this.emit('ready', this.id), SIGNAL_RECOVERY_DELAY);
+    fire(potential) {
+        if (this.isfiring) return false;
+        // Action potential is accumulated so that
+        // certain patterns can trigger even
+        // weak synapses.
+        this.potential += potential || 1;
+        setTimeout(() => this.potential -= potential, SIGNAL_RECOVERY_DELAY / 2);
+        if (this.potential > SIGNAL_FIRE_STRENGTH) {
+            // Fire signal
+            this.isfiring = true;
+            this.emit('fire', this.id);
+            this.synapses.forEach(synapse => {
+                if (synapse.t) {
+                    // Stronger connections will fire quicker
+                    // @see Conduction Velocity: https://faculty.washington.edu/chudler/cv.html
+                    synapse.c = setTimeout(() => {
+                        if (synapse.t.fire(synapse.w)) {
+                            // Avoid epileptic spasm by tracking when last fired
+                            synapse.l = new Date().getTime(); 
+                        }
+                    }, Math.round(SIGNAL_MAX_FIRE_DELAY * (1 - synapse.w)));
+                    
+                }
+            });
+            // Post-fire recovery
+            setTimeout(() => {
+                this.potential = 0;
+                this.isfiring = false;
+                this.emit('ready', this.id);
+            }, SIGNAL_RECOVERY_DELAY);
+        }
+        return true;
     }
 
 }
