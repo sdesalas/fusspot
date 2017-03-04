@@ -42,7 +42,7 @@ While this is sufficient for very simplistic scenarios, more complex scenarios (
 
 # Neural Network 
 
-A fusspot neural network is a learning engine that can process multiple inputs and generate outputs concurrently. 
+A fusspot neural network is a learning engine that can process multiple inputs and outputs concurrently. 
 
 Unlike traditional neural networks, fusspot introduces a slight delay between firing neurons, which varies depending on the strength of the connection. This creates [travelling waves, oscillations and paterns](https://sdesalas.github.io/fusspot/) that are affected by its inputs.
 
