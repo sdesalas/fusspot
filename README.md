@@ -48,4 +48,12 @@ Unlike traditional neural networks, fusspot introduces a slight delay between fi
 
 The neural network can be trained by increasing or decreasing the strength of neural pathways in the recent past. More closely mimicking the kind of Long Term Potentiation (LTP) seen in biological networks.
 
+```js
+const NeuralNetwork = require('fusspot').NeuralNetwork;
+
+var network = new NeuralNetwork(100);
+network.on('fire', id => console.log(`Firing {id}`));
+network.nodes[43].fire();
+```
+
 ![travelling wave](travellingwave.png)
