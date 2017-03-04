@@ -52,7 +52,7 @@ The neural network can be trained by increasing or decreasing the strength of ne
 const NeuralNetwork = require('fusspot').NeuralNetwork;
 
 var network = new NeuralNetwork(100);
-network.on('fire', id => console.log(`Firing {id}`));
+network.on('fire', id => console.log(`Firing ${id}`));
 network.nodes[43].fire();
 ```
 
