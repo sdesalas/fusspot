@@ -6,7 +6,7 @@ Fusspot is a learning engine I've been meaning to write for while now. Its only 
 
 ##Grid
 
-A fusspot Grid is a weighted matrix of inputs to outputs. While you can train it to be biased towards certain responses with patience, it is non determinisic and will just as likely learn on its own or veer away from what it has learnt (ie, do what it likes rather than what its told). 
+A fusspot [grid](Grid.js) is a weighted matrix of inputs to outputs. While you can train it to be biased towards certain responses with patience, it is non determinisic and will just as likely learn on its own or veer away from what it has learnt (ie, do what it likes rather than what its told). 
 
 At present, links between inputs and ouputs (think squares in a game of chess) are biased positively or negatively depending on a combination of random choices and training/reinforcement which biases the likelyhood of those choices.
 
@@ -42,7 +42,7 @@ While this is sufficient for very simplistic scenarios, more complex scenarios (
 
 # Neural Network 
 
-A fusspot neural network is a learning engine that can process multiple inputs and outputs concurrently. 
+A fusspot [neural network](NeuralNetwork.js) is a learning engine that can process multiple inputs and outputs concurrently. 
 
 Unlike traditional neural networks, fusspot introduces a slight delay between firing neurons, which varies depending on the strength of the connection. This creates [travelling waves, oscillations and paterns](https://sdesalas.github.io/fusspot/) that are affected by its inputs.
 
