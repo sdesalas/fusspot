@@ -44,7 +44,7 @@ While this is sufficient for very simplistic scenarios, more complex scenarios (
 
 A fusspot [neural network](NeuralNetwork.js) is a learning engine ideal for performing [paralell signal processing](https://en.wikipedia.org/wiki/Parallel_multidimensional_digital_signal_processing) on multiple inputs and output channels concurrently. This becomes quite handy when trying to train a robot that is processing input from various sensors and learning behavioural patterns from actuator-sensor feedback loops while interacting with their enviroment.
 
-Unlike standard models of Neural Network rooted in mathematics, fusspot attempts to mimick biological networks by introducing a slight delay between firing neurons, which varies depending on the strength of the connection. This creates [travelling waves, oscillations and paterns](https://sdesalas.github.io/fusspot/) that vary in tandem with inputs.
+Unlike [standard models](https://en.wikipedia.org/wiki/Types_of_artificial_neural_networks) of Neural Network rooted in mathematics, fusspot attempts to mimick biological networks by introducing a slight delay between firing neurons, which varies depending on the strength of the connection. This creates [travelling waves, oscillations and paterns](https://sdesalas.github.io/fusspot/) that vary in tandem with inputs.
 
 The neural network can be trained by increasing or decreasing the strength of neural pathways used in the recent past. More closely imitating the kind of [Long Term Potentiation (LTP)](https://en.wikipedia.org/wiki/Long-term_potentiation) seen in biological networks.
 
