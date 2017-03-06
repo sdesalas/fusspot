@@ -46,7 +46,7 @@ A fusspot [neural network](NeuralNetwork.js) is a learning engine ideal for perf
 
 Unlike standard models of Neural Network rooted in mathematics, fusspot attempts to mimick biological networks by introducing a slight delay between firing neurons, which varies depending on the strength of the connection. This creates [travelling waves, oscillations and paterns](https://sdesalas.github.io/fusspot/) that vary in tandem with inputs.
 
-The neural network can be trained by increasing or decreasing the strength of neural pathways used in the recent past. More closely imitate the kind of [Long Term Potentiation (LTP)](https://en.wikipedia.org/wiki/Long-term_potentiation) seen in biological networks.
+The neural network can be trained by increasing or decreasing the strength of neural pathways used in the recent past. More closely imitating the kind of [Long Term Potentiation (LTP)](https://en.wikipedia.org/wiki/Long-term_potentiation) seen in biological networks.
 
 ```js
 const NeuralNetwork = require('fusspot').NeuralNetwork;
