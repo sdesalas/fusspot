@@ -48,6 +48,8 @@ Unlike [standard models](https://en.wikipedia.org/wiki/Types_of_artificial_neura
 
 The neural network can be trained by increasing or decreasing the strength of neural pathways used in the recent past. More closely imitating the kind of [Long Term Potentiation (LTP)](https://en.wikipedia.org/wiki/Long-term_potentiation) seen in biological networks.
 
+Please note that while the content here touches on the academic, this is not a research paper. I'm just trying to get my robots to interact with the external world in a way that living creatures would.
+
 ```js
 const NeuralNetwork = require('fusspot').NeuralNetwork;
 
