@@ -42,7 +42,7 @@ While this is sufficient for very simplistic scenarios, more complex scenarios (
 
 # Neural Network 
 
-A fusspot [neural network](NeuralNetwork.js) is a learning engine ideal for performing [paralell signal processing](https://en.wikipedia.org/wiki/Parallel_multidimensional_digital_signal_processing) on multiple inputs and output channels concurrently. 
+A fusspot [neural network](NeuralNetwork.js) is a learning engine ideal for performing [paralell signal processing](https://en.wikipedia.org/wiki/Parallel_multidimensional_digital_signal_processing) on multiple inputs and output channels concurrently. This becomes quite handy when trying to process input from various sensors and learn behavioural patters from actuator-sensor feedback loops such as those of robots interacting with their enviroment.
 
 Unlike standard models of Neural Network rooted in mathematics, fusspot attempts to mimick biological networks by introducing a slight delay between firing neurons, which varies depending on the strength of the connection. This creates [travelling waves, oscillations and paterns](https://sdesalas.github.io/fusspot/) that vary in tandem with inputs.
 
