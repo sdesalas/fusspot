@@ -23,7 +23,7 @@ describe('NeuralNetwork', function() {
     });
 
     it('#strength', function() {
-        assert.around(network.strength, 0.5);
+        assert.around(network.strength, 0.24);
     });
 
     it('#export()', function() {

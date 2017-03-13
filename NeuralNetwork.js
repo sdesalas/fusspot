@@ -33,7 +33,7 @@ class NeuralNetwork extends EventEmitter {
             // Initialize with size
             this.nodes = new Array(size)
                 .fill()
-                .map((n, i) => Neuron.random(i, size, shape));
+                .map((n, i) => Neuron.random(i, size, this.shape));
         }
         else if (size && size.nodes && size.nodes instanceof Array) {
             // Initialize with exported network
