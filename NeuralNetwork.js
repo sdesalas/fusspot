@@ -3,36 +3,40 @@
 const EventEmitter = require('events');
 
 const NETWORK_DEFAULT_SIZE = 256;
-const SYNAPSE_AVG_PER_NEURON = 2;
-const SIGNAL_MAX_FIRE_DELAY = 300;
-const SIGNAL_RECOVERY_DELAY = 1200;
-const SIGNAL_FIRE_STRENGTH = 0.33;
+const NETWORK_DEFAULT_SHAPE = 'sausage';
+const SYNAPSE_AVG_PER_NEURON = 4;
+const SIGNAL_MAX_FIRE_DELAY = 200;
+const SIGNAL_RECOVERY_DELAY = 1250;
+const SIGNAL_FIRE_THRESHOLD = 0.3;
 const LEARNING_RATE = 0.3;
 const LEARNING_PERIOD = 60 * 1000;
 
 class NeuralNetwork extends EventEmitter {
 
-    constructor(size) {
+    // Initialize neural network
+    // Either using size or network definition
+    // new NeuralNetwork(20);
+    // new NeuralNetwork({ nodes: [
+    //   {id: 1, s: [{t: 1, w: 0.41}] }, 
+    //   {id: 2, s: [{t: 2, w: 0.020}, {t: 3, w: 0.135}] },
+    //   {id: 3, s: [{t: 5, w: 0.241}] }, 
+    //   {id: 4, s: [{t: 1, w: 0.02}] }, 
+    //   {id: 5, s: [{t: 6, w: 0.92}, {t: 2, w: 0.41}] },
+    //   {id: 6, s: [{t: 2, w: 0.41}] }
+    // ]})
+    constructor(size, shape) {
         super();
+        this.shape = shape || NETWORK_DEFAULT_SHAPE;
         this.nodes = [];
+        this.channels = [];
         if (typeof size === 'number') {
             // Initialize with size
-            // ie new NeuralNetwork(300)
             this.nodes = new Array(size)
                 .fill()
-                .map((n, i) => Neuron.random(size, i));
+                .map((n, i) => Neuron.random(i, size, shape));
         }
         else if (size && size.nodes && size.nodes instanceof Array) {
             // Initialize with exported network
-            // ie new NeuralNetwork({ nodes: [
-            //   {id: 1, s: [{t: 1, w: 0.41}] }, 
-            //   {id: 2, s: [{t: 2, w: 0.020}, {t: 3, w: 0.135}] },
-            //   {id: 3, s: [{t: 5, w: 0.241}] }, 
-            //   {id: 4, s: [{t: 1, w: 0.02}] }, 
-            //   {id: 5, s: [{t: 6, w: 0.92}, {t: 2, w: 0.41}] },
-            //   {id: 6, s: [{t: 2, w: 0.41}] }
-            // ]})
-            //
             this.nodes = size.nodes.map((n, i) => {
                 var neuron = new Neuron(n.s, n.id);
                 neuron.synapses.forEach(s => s.i = s.t);
@@ -41,19 +45,23 @@ class NeuralNetwork extends EventEmitter {
         } 
         // Extra initialization per neuron
         this.nodes.forEach(neuron => {
-            // Log fire event
-            neuron.on('fire', id => console.log('Firing ' + id));
+            neuron.on('fire', id => this.emit('fire', id));
             // Add synapse ref pointers to corresponding target neurons
             neuron.synapses.forEach(synapse => {
                 synapse.t = this.nodes[synapse.i];
             })
         });
+        //this.on('fire', id => console.log(id));
     }
 
+    // Clones network, useful to mutating network to determine fittest alternative
+    // network.clone()
     clone() {
         return new NeuralNetwork(this.export());
     }
 
+    // Exports network, useful for cloning and saving to disk
+    // network.export()
     export() {
         return { 
             nodes: this.nodes.map(node => Object({ 
@@ -62,14 +70,14 @@ class NeuralNetwork extends EventEmitter {
                     .slice()
                     // Remove circular ref pointers
                     .map(s => Object({t: s.i, w: s.w})) 
-            }))
+            })),
+            // Clone array of arrays
+            channels: this.channels.map(channel => channel.slice())
         }
     }
 
-    unlearn(rate) {
-        this.learn(-1 * (rate || LEARNING_RATE));
-    }
-
+    // Reinforces synapses that fire recently
+    // network.learn()
     learn(rate) {
         var start = new Date().getTime() - LEARNING_PERIOD;
         this.synapses
@@ -83,6 +91,70 @@ class NeuralNetwork extends EventEmitter {
             });
     }
 
+    // Weakens synapses that fired recently
+    // network.unlearn()
+    unlearn(rate) {
+        this.learn(-1 * (rate || LEARNING_RATE));
+    }
+
+    // Each channel defaults to 32 bits (neurons) to process
+    // network.channel() -> next available at 32 bits
+    // network.channel(16) -> next available at 16 bits
+    // network.channel(16, 2) -> slot 2 at 16 bits
+    // network.channel([2,3,4,5,6,7], 2) -> slot 2 with array of predefined nodes
+    channel(bits, index) {
+        var index = index || this.channels.length,
+            bits = typeof bits === 'number' ? bits : 32,
+            nodes = bits instanceof Array ? bits : undefined;
+        if (!nodes) {
+            // Find starting point and add nodes to channel
+            var start = this.channels.reduce((a, c) => a + c.length, 0);
+            nodes = new Array(bits).fill().map((n, i) => start + i);
+        }
+        this.channels[index] = nodes;
+        return nodes;
+    }
+
+    // Input some data into the neural network
+    // network.input('hello')
+    input(data, channelIndex) {
+        var bytes, 
+            nodes = this.channels[channelIndex || 0] || this.channel();
+        if (nodes && nodes.length) {
+            if (typeof data === 'number' && data.toString(2).length <= 32) {
+                bytes = data.toString(2).split('');
+            }
+            else {
+                if (typeof data !== 'string') {
+                    data = String(data);
+                }
+                bytes = Utils.hash(data).toString(2).split('');
+            }
+            while (bytes.length < 32) {
+                bytes.unshift('0');
+            }
+            // Apply bits in data to each neuron listed under inputs
+            // 1 = fire neuron, 0 = skip
+            bytes.forEach((byte, i) => {
+                var node = this.nodes[nodes[i]];
+                if (byte === '1' && node) {
+                    node.fire();
+                }
+            });
+            return bytes.join('');
+        }
+    }
+
+    // Fire a neuron, used for testing and visualization
+    // network.fire(24);
+    fire(id) {
+        if (id && this.nodes[id]) {
+            this.nodes[id].fire();
+        }
+    }
+
+    // Stops the network firing, used for testing and visualization
+    // network.stop();
     stop() {
         this.synapses.forEach(s => clearTimeout(s.c));
     }
@@ -111,33 +183,18 @@ class Neuron extends EventEmitter {
     }
 
     // Generates a random neuron
-    static random(networkSize, position) {
+    static random(position, networkSize, shape) {
         // Number of synapses are random based on average
         var synapses = new Array(Random.integer(1, SYNAPSE_AVG_PER_NEURON * 2 - 1))
             .fill()
             .map(() => {
-                var i, w = Math.random();
-                
-                // Use a tube-shaped network
-                // (neurons linked to neurons with similar id)
-                var range = Math.ceil(networkSize / 10);
-                var offset = position + Math.floor(range / 2);
-                for (var tries = 0; tries < 3; tries++) {
-                    var from = -1 * range + offset;
-                    var to = range + offset;
-                    i = Random.integer(from, to);
-                    if (i > 0 && i < networkSize && i !== position) {
-                        return { i, w }; // index, weight
-                    }
-                }
-                
-                // Random network
-                // (neurons linked at random)
-                i = Random.integer(0, networkSize);
-                if (i !== position) {
-                    return { i, w };
-                }
+                var shaper = NetworkShapes[shape],
+                    i = shaper(position, networkSize), 
+                    w = Math.pow(Math.random(), 3);
 
+                if (i) {
+                    return { i, w }; // index, weight
+                }
                 // Cannot find suitable target
                 return null;
             })
@@ -153,7 +210,7 @@ class Neuron extends EventEmitter {
         // weak synapses.
         this.potential += potential || 1;
         setTimeout(() => this.potential -= potential, SIGNAL_RECOVERY_DELAY / 2);
-        if (this.potential > SIGNAL_FIRE_STRENGTH) {
+        if (this.potential > SIGNAL_FIRE_THRESHOLD) {
             // Fire signal
             this.isfiring = true;
             this.emit('fire', this.id);
@@ -182,6 +239,88 @@ class Neuron extends EventEmitter {
 
 }
 
+class NetworkShapes {
+
+    // Random ball shape
+    // (neurons linked at random)
+    static ball (position, size) {
+        var i = Random.integer(0, size);
+        if (i !== position) {
+            return i;
+        }
+        return null;
+    }
+
+    // Tube shape
+    static tube (position, size) {
+        var i, range = Math.ceil(size / 5);
+        for (var tries = 0; tries < 3; tries++) {
+            var from = -1 * range + position;
+            var to = range + position;
+            i = Random.integer(from, to);
+            if (i > 0 && i < size && i !== position) {
+                return i; 
+            }
+        }
+        return null;
+    }
+
+    // Snake shape
+    static snake (position, size) {
+        var i, range = Math.ceil(size / 20);
+        for (var tries = 0; tries < 3; tries++) {
+            var from = -1 * range + position;
+            var to = range + position;
+            i = Random.integer(from, to);
+            if (i > 0 && i < size && i !== position) {
+                return i; 
+            }
+        }
+        return null;
+    }
+
+    // Forward-biased sausage shape
+    // (neurons linked to neurons with similar id, slightly ahead of each other)
+    static sausage (position, size) {
+        var i, range = Math.ceil(size / 10);
+        var offset = position + Math.floor(range / 2);
+        for (var tries = 0; tries < 3; tries++) {
+            var from = -1 * range + offset;
+            var to = range + offset;
+            i = Random.integer(from, to);
+            if (i > 0 && i < size && i !== position) {
+                return i; 
+            }
+        }
+        i = Random.integer(0, size);
+        if (i !== position) {
+            return i;
+        }
+        return null;
+    }
+
+    // Donught shape
+    static donught (position, size) {
+        var i, range = Math.ceil(size / 20);
+        var offset = position + Math.floor(range / 2);
+        for (var tries = 0; tries < 3; tries++) {
+            var from = -1 * range + offset;
+            var to = range + offset;
+            i = Random.integer(from, to);
+            if (i >= size) {
+                return i - size; // Link to beginning
+            }
+            if (i < 0) {
+                return size + i; // Link to end
+            }
+            if (i !== position) {
+                return i; 
+            }
+        }
+        return null;
+    }
+}
+
 class Random {
 
     // Inclusive random integers
@@ -202,6 +341,23 @@ class Random {
         } while (length > 0 && output.length < length)
         return output;
     }
+}
+
+class Utils {
+
+    // Fast string hashing algorithm
+    // Converts string to int predictably
+    static hash(str){
+        var char, hash = 0;
+        if (!str) return hash;
+        for (var i = 0; i < str.length; i++) {
+            char = str.charCodeAt(i);
+            hash = ((hash<<5)-hash)+char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash;
+    }
+
 }
 
 module.exports = NeuralNetwork;

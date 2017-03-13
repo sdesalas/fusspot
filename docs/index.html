@@ -3,23 +3,42 @@
   <head>
     <meta charset="UTF-8">
     <title>Playground</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.18.1/vis.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.18.1/vis.min.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.18.1/vis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.3/vue.min.js"></script>
     <style>
         body { padding: 0 20px; width: 640px; }
-        #map { width: 600px; height: 600px; border: 1px solid #ddd; margin-top: 20px; }
+        #map { width: 600px; height: 600px; border: 1px solid #ddd; margin-top: -15px; }
         #log { font: 12px "Courier New"; }
     </style>
   </head>
-  <body>
-    <h1>Neural Network</h1>
-    <p>Double click a node and watch the message bounce around.
-            <button class="btn btn-danger pull-right" id="stop" onclick="network.stop()" style="float: right; margin: 0 5px;">Stop</button>
-            <button class="btn btn-primary pull-right" id="stop" onclick="location.href=location.href" style="float: right; margin: 0 5px;">Refresh</button>
-    </p>
+  <body >
+    <h2>Neural Network :: Playground</h2>
+    <p>Double click a node and watch the message bounce around. </p>
+    <div class="btn-toolbar" id="network">
+      <div class="btn-group btn-group-sm">
+       <button type="button" class="btn btn-default" v-for="shape in shapes" @click="update({shape})" :class="{ 'btn-primary' : shape === network.shape}">{{shape}}</button>
+      </div>
+      <div class="btn-group btn-group-sm" style="margin-left: 10px; padding-top: 5px;">
+        30
+      </div>
+      <div class="btn-group btn-group-sm" style="padding-top: 5px;">
+        <input type="range" min="30" max="500" v-model.number="size" id="size" @change="update({size: document.getElementById('size').value})">
+      </div>
+      <div class="btn-group btn-group-sm" style="padding-top: 5px;">
+        500
+      </div>
+      <div class="btn-group btn-group-sm pull-right">
+        <button class="btn btn-danger" id="stop" onclick="network.stop()">Stop</button>
+      </div>
+      <div class="btn-group btn-group-sm pull-right">
+        <button class="btn btn-success" id="stop" onclick="location.href=location.href">Refresh</button>
+      </div>
+    </div>
     <div id="map"></div>
     <div id="log"></div>
+    </div>
     <script>
         function display(network) {
             var options = { 
@@ -40,11 +59,24 @@
             });
             var map = new vis.Network(document.getElementById('map'), { nodes: data.nodes, edges: data.edges }, options);
             map.on('doubleClick', function (params) {
-                params.event = "[original event]";
-                document.getElementById('log').innerHTML = '<p>doubleClick event:</p>' + JSON.stringify(params, null, 4);
+                //params.event = "[original event]";
+                //document.getElementById('log').innerHTML = '<p>doubleClick event:</p>' + JSON.stringify(params, null, 4);
                 var target = params.nodes[0];
                 if (target && network.nodes[target]) {
                     network.nodes[target].fire();
+                }
+            });
+            window.vue = new Vue({
+                el: '#network',
+                data: { network: network, size: network.size, shapes: ['ball', 'tube', 'sausage', 'snake', 'donught'] },
+                methods: {
+                    update: function(opts) {
+                        this.network.shape = opts.shape || this.network.shape;
+                        this.size = options.size || this.size;
+                        if (opts.shape) {
+                            location.href = location.href.split('?')[0] + '?shape=' + this.network.shape + '&size=' + this.size;
+                        }
+                    }
                 }
             });
         }
