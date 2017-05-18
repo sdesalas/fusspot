@@ -4,7 +4,7 @@
 
 Fusspot is a learning engine I've been meaning to write for while now. Its only now that it has become relevant as I am building [nodebots](http://nodebots.io/).
 
-##Grid
+## Grid
 
 A fusspot [grid](Grid.js) is a weighted matrix of inputs to outputs. While you can train it to be biased towards certain responses with patience, it is non determinisic and will just as likely learn on its own or veer away from what it has learnt (ie, do what it likes rather than what its told). 
 
