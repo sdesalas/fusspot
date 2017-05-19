@@ -375,6 +375,4 @@ fusspot.Utils = Utils;
 
 if (this.module) {
     this.module.exports = fusspot.NeuralNetwork;
-} else {
-    this.NeuralNetwork = fusspot.NeuralNetwork;
 }
