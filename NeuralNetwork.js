@@ -11,6 +11,11 @@ const SIGNAL_FIRE_THRESHOLD = 0.3;
 const LEARNING_RATE = 0.3;
 const LEARNING_PERIOD = 60 * 1000;
 
+// namespace
+const fusspot = this.fusspot || {};
+
+(function(){ // Scope to allow loading directly in browser
+
 class NeuralNetwork extends EventEmitter {
 
     // Initialize neural network
@@ -359,7 +364,13 @@ class Utils {
     }
 
 }
+    
+fusspot.NeuralNetwork = NeuralNetwork;
+    
+})();
 
 if (this.module) {
-    module.exports = NeuralNetwork;
+    this.module.exports = fusspot.NeuralNetwork;
+} else {
+    this.NeuralNetwork = fusspot.NeuralNetwork;
 }
