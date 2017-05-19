@@ -1,6 +1,6 @@
 "use strict";
 
-const EventEmitter = require('events');
+const EventEmitter = this.EventEmitter || require('events');
 
 const NETWORK_DEFAULT_SIZE = 256;
 const NETWORK_DEFAULT_SHAPE = 'sausage';
@@ -360,4 +360,6 @@ class Utils {
 
 }
 
-module.exports = NeuralNetwork;
+if (this.module) {
+    module.exports = NeuralNetwork;
+}
