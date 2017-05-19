@@ -367,7 +367,7 @@ class Utils {
     
 fusspot.NeuralNetwork = NeuralNetwork;
 fusspot.Neuron = Neuron;
-fusspot.NetworkShape = NetworkShape;
+fusspot.NetworkShapes = NetworkShapes;
 fusspot.Random = Random;
 fusspot.Utils = Utils;
     
