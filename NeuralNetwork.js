@@ -12,7 +12,7 @@ const LEARNING_RATE = 0.3;
 const LEARNING_PERIOD = 60 * 1000;
 
 // namespace
-const fusspot = this.fusspot || {};
+let fusspot = this.fusspot || {};
 
 (function(){ // Scope to allow loading directly in browser
 
