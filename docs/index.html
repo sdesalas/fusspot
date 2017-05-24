@@ -73,7 +73,7 @@
                     update: function(opts) {
                         this.network.shape = opts.shape || this.network.shape;
                         this.size = options.size || this.size;
-                        if (opts.shape) {
+                        if (opts.shape || opts.size) {
                             location.href = location.href.split('?')[0] + '?shape=' + this.network.shape + '&size=' + this.size;
                         }
                     }
